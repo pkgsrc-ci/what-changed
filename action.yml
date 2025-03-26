@@ -1,0 +1,88 @@
+#
+# Calculate what changes were made in this changeset.  The outputs can be
+# used by subsequent actions to decide what needs to be done.
+#
+name: what-changed
+description: Calculate what changes were made
+outputs:
+  bootstrap-hash:
+    description: Computed hash of all files used by bootstrap
+    value: ${{ steps.bootstrap.outputs.hash }}
+  run-pkglint:
+    description: Whether we need to run pkglint
+    value: ${{ steps.pkglint.outputs.any_changed }}
+  pkglint-files:
+    description: List of files to lint
+    value: ${{ steps.pkglint.outputs.all_changed_files }}
+  run-pkgbuild:
+    description: Whether we need to run any package builds
+    value: ${{ steps.pkgpath.outputs.any_changed }}
+  pkgbuild-files:
+    description: List of modified package files
+    value: ${{ steps.pkgpath.outputs.all_changed_files }}
+runs:
+  using: composite
+  steps:
+    #
+    # This should contain all of the files that affect the bootstrap path.
+    # Mostly taken from bootstrap/bootstrap and pkgtools/pkg_install/Makefile,
+    # there may still be some paths that are missing.
+    #
+    - id: bootstrap
+      shell: bash
+      run: |
+        echo hash=${{ hashFiles(
+          'archivers/bzip2/**',
+          'archivers/libarchive/**',
+          'archivers/pax/**',
+          'bootstrap/bootstrap',
+          'devel/bmake/**',
+          'devel/zlib/**',
+          'lang/nawk/**',
+          'mk/**',
+          'net/libfetch/**',
+          'pkgtools/bootstrap-extras/**',
+          'pkgtools/bootstrap-mk-files/**',
+          'pkgtools/cwrappers/**',
+          'pkgtools/libnbcompat/**',
+          'pkgtools/mktools/**',
+          'pkgtools/pkg_install/**',
+          'securitynetpgpverify/mksh/**',
+          'shells/mksh/**',
+          'shells/pdksh/**',
+          'sysutils/bsdinstall/**',
+          'sysutils/install-sh/**',
+          'textproc/nbsed/**') }} >> "$GITHUB_OUTPUT"
+    #
+    # List of files that have been modified that should potentially be checked
+    # for pkglint.  Ignore any documentation or support files.
+    #
+    - id: pkglint
+      uses: tj-actions/changed-files@v44
+      with:
+        files_ignore: |
+          .github/**
+          README.*
+          _NetBSD-pkgdb
+          doc/**
+          pkglocate
+    #
+    # List of files that have been modified that should potentially be used to
+    # generate a list of package paths to build.  Ignore any non-package files.
+    #
+    - id: pkgpath
+      uses: tj-actions/changed-files@v44
+      with:
+        files_ignore: |
+          */Makefile
+          .github/**
+          Makefile
+          README.*
+          _NetBSD-pkgdb
+          bootstrap/**
+          distfiles/**
+          doc/**
+          licenses/**
+          mk/**
+          pkglocate
+          regress/**
