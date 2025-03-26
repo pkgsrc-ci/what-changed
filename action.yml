@@ -6,8 +6,8 @@ name: pkgsrc changed files
 author: pkgsrc-ci
 description: Calculate what changes were made in pkgsrc commits
 branding:
-  icon: git-commit
-  color: purple
+  icon: package
+  color: orange
 outputs:
   bootstrap-hash:
     description: Computed hash of all files used by bootstrap
