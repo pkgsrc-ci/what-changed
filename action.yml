@@ -2,8 +2,9 @@
 # Calculate what changes were made in this changeset.  The outputs can be
 # used by subsequent actions to decide what needs to be done.
 #
-name: what-changed
-description: Calculate what changes were made
+name: pkgsrc changed files
+author: pkgsrc-ci
+description: Calculate what changes were made in pkgsrc commits
 outputs:
   bootstrap-hash:
     description: Computed hash of all files used by bootstrap
